@@ -12,6 +12,7 @@ import com.example.SmartConsult.dto.DoctorResponse;
 import com.example.SmartConsult.entity.Doctor;
 import com.example.SmartConsult.entity.Role;
 import com.example.SmartConsult.entity.User;
+import com.example.SmartConsult.exception.ResourceNotFoundException;
 import com.example.SmartConsult.repository.AppointmentRepository;
 import com.example.SmartConsult.repository.DoctorRepository;
 import com.example.SmartConsult.repository.UserRepository;
@@ -35,10 +36,10 @@ public class DoctorService {
     public void addDoctor(DoctorRequest request) {
 
         User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         if (user.getRole() != Role.DOCTOR) {
-            throw new RuntimeException("User is not a Doctor");
+            throw new ResourceNotFoundException("User is not a Doctor");
         }
 
         Doctor doctor = new Doctor();
@@ -78,11 +79,11 @@ public class DoctorService {
 
         // 2. Get user
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Doctor not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Doctor not found"));
 
         // 3. Get doctor profile
         Doctor doctor = doctorRepository.findByUserId(user.getId())
-                .orElseThrow(() -> new RuntimeException("Doctor profile not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Doctor profile not found"));
 
         // 4. Get appointments
         return appointmentRepository.findByDoctorId(doctor.getId())

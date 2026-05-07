@@ -1,7 +1,14 @@
 package com.example.SmartConsult.dto;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+
 public class LoginRequest {
-     private String email;
+    @NotBlank(message = "Email cannot be blank")
+    @Email(message = "Email should be valid")
+    private String email;
+
+    @NotBlank(message = "Password cannot be blank")
     private String password;
     public String getEmail() {
         return email;

@@ -3,7 +3,6 @@ package com.example.SmartConsult.controller;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,6 +14,7 @@ import com.example.SmartConsult.dto.DoctorAppointmentResponse;
 import com.example.SmartConsult.dto.DoctorRequest;
 import com.example.SmartConsult.dto.DoctorResponse;
 import com.example.SmartConsult.service.DoctorService;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api")
@@ -28,11 +28,11 @@ public class DoctorController {
 
     //ADMIN
     @PostMapping("/admin/doctors")
-    public ResponseEntity<String> addDoctor(@RequestBody DoctorRequest request){
+    public ResponseEntity<String> addDoctor(@Valid @RequestBody DoctorRequest request){
         doctorService.addDoctor(request);
         return ResponseEntity
         .status(HttpStatus.CREATED)
-        .body("Doctor added successfull");
+        .body("Doctor added successfully");
     }
 
     //PATIENT
@@ -42,8 +42,8 @@ public class DoctorController {
     }
 
     @GetMapping("/doctor/appointments")
-public ResponseEntity<List<DoctorAppointmentResponse>> myAppointments() {
-    return ResponseEntity.ok(doctorService.getDoctorAppointments());
-}
+    public ResponseEntity<List<DoctorAppointmentResponse>> myAppointments() {
+        return ResponseEntity.ok(doctorService.getDoctorAppointments());
+    }
 
 }

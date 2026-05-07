@@ -12,6 +12,8 @@ import com.example.SmartConsult.entity.Appointment;
 import com.example.SmartConsult.entity.AppointmentStatus;
 import com.example.SmartConsult.entity.Doctor;
 import com.example.SmartConsult.entity.User;
+import com.example.SmartConsult.exception.DuplicateBookingException;
+import com.example.SmartConsult.exception.ResourceNotFoundException;
 import com.example.SmartConsult.repository.AppointmentRepository;
 import com.example.SmartConsult.repository.DoctorRepository;
 import com.example.SmartConsult.repository.UserRepository;
@@ -32,7 +34,7 @@ public class AppointmentService {
     }
 
     
-    // PATIENT
+    // PATIENT: Book appointment
     public void bookAppointment(AppointmentRequest request) {
 
         // 1. Get logged-in patient email
@@ -42,11 +44,11 @@ public class AppointmentService {
                 .getPrincipal();
 
         User patient = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Patient not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Patient not found"));
 
         // 2. Check doctor exists
         Doctor doctor = doctorRepository.findById(request.getDoctorId())
-                .orElseThrow(() -> new RuntimeException("Doctor not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Doctor not found"));
 
         // 3. Prevent double booking
         boolean exists = appointmentRepository
@@ -57,7 +59,7 @@ public class AppointmentService {
                 );
 
         if (exists) {
-           return;
+            throw new DuplicateBookingException("Time slot already booked for this doctor");
         }
 
         // 4. Create appointment
@@ -71,7 +73,7 @@ public class AppointmentService {
         appointmentRepository.save(appointment);
     }
 
-    // PATIENT
+    // PATIENT: View own appointments
     public List<AppointmentResponse> myAppointments() {
 
         String email = (String) SecurityContextHolder
@@ -80,7 +82,7 @@ public class AppointmentService {
                 .getPrincipal();
 
         User patient = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Patient not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Patient not found"));
 
         return appointmentRepository.findAll()
                 .stream()
@@ -95,6 +97,32 @@ public class AppointmentService {
                     return res;
                 })
                 .collect(Collectors.toList());
+    }
+
+    // PATIENT: Cancel appointment
+    public void cancelAppointment(Long appointmentId) {
+        
+        String email = (String) SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal();
+
+        User patient = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("Patient not found"));
+
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Appointment not found"));
+
+        if (!appointment.getPatient().getId().equals(patient.getId())) {
+            throw new ResourceNotFoundException("You can only cancel your own appointments");
+        }
+
+        if (appointment.getStatus() == AppointmentStatus.CANCELLED) {
+            throw new ResourceNotFoundException("Appointment is already cancelled");
+        }
+
+        appointment.setStatus(AppointmentStatus.CANCELLED);
+        appointmentRepository.save(appointment);
     }
 
 }

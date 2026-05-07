@@ -14,7 +14,7 @@ import jakarta.persistence.Table;
 public class MedicalRecord {
     
 
-     @Id
+        @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
         private Long id;
 

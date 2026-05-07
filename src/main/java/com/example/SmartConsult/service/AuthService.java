@@ -7,6 +7,8 @@ import com.example.SmartConsult.dto.LoginRequest;
 import com.example.SmartConsult.dto.LoginResponse;
 import com.example.SmartConsult.dto.RegisterRequest;
 import com.example.SmartConsult.entity.User;
+import com.example.SmartConsult.exception.InvalidCredentialsException;
+import com.example.SmartConsult.exception.ResourceNotFoundException;
 import com.example.SmartConsult.repository.UserRepository;
 import com.example.SmartConsult.security.JwtService;
 
@@ -26,7 +28,7 @@ public class AuthService {
 
     public void register(RegisterRequest request){
         if(userRepository.existsByEmail(request.getEmail())){
-            throw new RuntimeException("Email already registered");
+            throw new ResourceNotFoundException("Email already registered");
         }
         User user=new User();
         user.setName(request.getName());
@@ -43,11 +45,11 @@ public class AuthService {
 
         //1. find user by email
         User user=userRepository.findByEmail(request.getEmail())
-                                        .orElseThrow(()->new RuntimeException("Invalid email or password "));
+                                        .orElseThrow(()->new InvalidCredentialsException("Invalid email or password"));
 
         //2.validate password
         if(!passwordEncoder.matches(request.getPassword(),user.getPassword())){
-            throw new RuntimeException("Invalid emial or password");
+            throw new InvalidCredentialsException("Invalid email or password");
         }
 
         //3. generate JwT

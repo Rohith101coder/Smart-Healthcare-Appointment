@@ -13,6 +13,7 @@ import com.example.SmartConsult.dto.LoginRequest;
 import com.example.SmartConsult.dto.LoginResponse;
 import com.example.SmartConsult.dto.RegisterRequest;
 import com.example.SmartConsult.service.AuthService;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -25,20 +26,15 @@ public class AuthController {
 
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody RegisterRequest request){
+    public ResponseEntity<String> register(@Valid @RequestBody RegisterRequest request){
         authService.register(request);
         return ResponseEntity
         .status(HttpStatus.CREATED)
         .body("User registered successfully");
     }
 
-// @PostMapping("/register")
-// public String debug(@RequestBody Object body) {
-//     return body.toString();
-// }
-
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request){
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request){
         LoginResponse response=authService.login(request);
         return ResponseEntity.ok(response);
     }
